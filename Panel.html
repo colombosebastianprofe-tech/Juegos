@@ -40,45 +40,36 @@
     
     <div class="status" id="status">Esperando acción...</div>
 </div>
-
 <script>
-    // TUS DATOS DE FIREBASE (Los mismos que en index.html)
-    const firebaseConfig = {
-        apiKey: "AIzaSyDRy05apGD1fffZlhjj6O5Z4R1epkxNJcM",
-        authDomain: "duelodigital-4e16c.firebaseapp.com",
-        databaseURL: "https://duelodigital-4e16c-default-rtdb.firebaseio.com",
-        projectId: "duelodigital-4e16c",
-        storageBucket: "duelodigital-4e16c.firebasestorage.app",
-        messagingSenderId: "547123191686",
-        appId: "1:547123191686:web:9b7dcbb31cb956d35cd607"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    // ... (Mantén tu configuración de Firebase igual) ...
 
     function resetScores() {
         const pin = document.getElementById('pin').value;
-        const status = document.getElementById('status');
+        if (pin === "1234") {
+            // Seteamos puntos a 0 y detenemos cualquier juego activo
+            db.ref('/').update({
+                scores: { Bondiolas: 0, Imperio: 0 },
+                gameState: "waiting",
+                endTime: 0
+            }).then(() => alert("Marcador reseteado y juego detenido."));
+        } else { alert("PIN Incorrecto"); }
+    }
 
-        // AQUÍ ELIGES TU CONTRASEÑA (Cámbiala por la que quieras)
-        if (pin === "1234") { 
-            if(confirm("¿Estás seguro de que quieres borrar todos los puntos?")) {
-                db.ref('scores').set({
-                    Bondiolas: 0,
-                    Imperio: 0
-                }).then(() => {
-                    status.innerText = "✅ ¡Marcador reseteado con éxito!";
-                    status.style.color = "#00b894";
-                    document.getElementById('pin').value = "";
-                }).catch((error) => {
-                    status.innerText = "❌ Error: " + error.message;
-                    status.style.color = "#d63031";
-                });
-            }
-        } else {
-            alert("PIN Incorrecto. Intenta de nuevo.");
-        }
+    function startMatch() {
+        const pin = document.getElementById('pin').value;
+        if (pin === "1234") {
+            const durationInSeconds = 300; // 5 minutos
+            const endTime = Date.now() + (durationInSeconds * 1000);
+            
+            // Publicamos en Firebase que el juego EMPEZÓ y cuándo TERMINA
+            db.ref('/').update({
+                gameState: "playing",
+                endTime: endTime,
+                scores: { Bondiolas: 0, Imperio: 0 } // Opcional: resetear al empezar
+            }).then(() => alert("¡PARTIDA INICIADA EN TODOS LOS DISPOSITIVOS!"));
+        } else { alert("PIN Incorrecto"); }
     }
 </script>
-</body>
-</html>
+
+<button class="btn-main" style="background: #0984e3;" onclick="startMatch()">🚀 INICIAR PARTIDA (5 MIN)</button>
+<button class="btn-reset" onclick="resetScores()">🛑 RESETEAR / DETENER</button>
