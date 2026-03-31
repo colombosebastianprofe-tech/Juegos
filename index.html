@@ -67,6 +67,7 @@
 </div>
 
 <script>
+    // (Configuración de Firebase igual que antes)
     const firebaseConfig = {
         apiKey: "AIzaSyDRy05apGD1fffZlhjj6O5Z4R1epkxNJcM",
         authDomain: "duelodigital-4e16c.firebaseapp.com",
@@ -76,9 +77,11 @@
         messagingSenderId: "547123191686",
         appId: "1:547123191686:web:9b7dcbb31cb956d35cd607"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Banco de preguntas (Las mismas 20)
     const questions = [
         { q: "¿Qué es la Huella Digital?", a: ["Una marca en el mouse", "El rastro de lo que haces en internet", "Una clave de acceso"], c: 1 },
         { q: "Si alguien te pide fotos privadas, debes:", a: ["Mandarlas", "Bloquear y avisar a un adulto", "Pedirle fotos a cambio"], c: 1 },
@@ -102,68 +105,63 @@
         { q: "¿Internet olvida lo que subes?", a: ["Sí, a los dos días", "No, lo digital es casi permanente", "Solo si borras el historial"], c: 1 }
     ];
 
-    // ... (Configuración de Firebase y lista de preguntas igual) ...
+    let myTeam = "";
+    let registered = false;
 
-let gameStarted = false;
+    // ESCUCHADOR PRINCIPAL (Sincronización total)
+    db.ref('/').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
 
-// ESCUCHAR ESTADO DEL JUEGO Y TIEMPO
-db.ref('/').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if(!data) return;
+        // 1. Actualizar puntuación siempre
+        document.getElementById('score-b').innerText = data.scores?.Bondiolas || 0;
+        document.getElementById('score-i').innerText = data.scores?.Imperio || 0;
 
-    // Actualizar Puntajes
-    document.getElementById('score-b').innerText = data.scores?.Bondiolas || 0;
-    document.getElementById('score-i').innerText = data.scores?.Imperio || 0;
+        // 2. Controlar la pantalla según el estado
+        if (data.gameState === "playing") {
+            // Solo si el alumno ya puso su nombre, lo dejamos entrar
+            if (registered) {
+                document.getElementById('setup').classList.add('hidden');
+                document.getElementById('results').classList.add('hidden');
+                document.getElementById('game-area').classList.remove('hidden');
+                
+                // Renderizar preguntas solo una vez
+                if (document.getElementById('questions-list').innerHTML === "") {
+                    render();
+                }
 
-    // Controlar el Reloj Sincrónico
-    if (data.gameState === "playing") {
-        if (!gameStarted) {
-            // Si el admin dio inicio, mostramos el juego
-            document.getElementById('setup').classList.add('hidden');
-            document.getElementById('game-area').classList.remove('hidden');
+                // Calcular tiempo restante
+                const now = Date.now();
+                const diff = Math.round((data.endTime - now) / 1000);
+                if (diff > 0) {
+                    let m = Math.floor(diff / 60), s = diff % 60;
+                    document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' + s : s}`;
+                } else {
+                    showFinalResults();
+                }
+            }
+        } else if (data.gameState === "waiting") {
+            // Si el admin resetea, volvemos al inicio
+            document.getElementById('game-area').classList.add('hidden');
             document.getElementById('results').classList.add('hidden');
-            if(document.getElementById('questions-list').innerHTML === "") render();
-            gameStarted = true;
+            document.getElementById('setup').classList.remove('hidden');
+            document.getElementById('questions-list').innerHTML = ""; // Limpiar preguntas
         }
-        
-        // Sincronizar Reloj
-        const now = Date.now();
-        const remaining = Math.round((data.endTime - now) / 1000);
-        
-        if (remaining > 0) {
-            let m = Math.floor(remaining / 60), s = remaining % 60;
-            document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
-        } else {
-            endMatch(); // El tiempo se acabó para todos
-        }
-    } else {
-        // Si el estado es "waiting", volvemos al inicio o mostramos resultados
-        gameStarted = false;
+    });
+
+    function startGame() {
+        const user = document.getElementById('username').value;
+        if (!user) return alert("¡Escribe tu nombre!");
+        myTeam = document.getElementById('team-select').value;
+        registered = true;
+        alert("¡Anatado! El juego comenzará cuando el profesor de la orden.");
     }
-});
-
-function startGame() {
-    // El alumno ahora solo se "anota", el juego empezará solo cuando tú lo inicies
-    const user = document.getElementById('username').value;
-    if(!user) return alert("¡Pon tu nombre!");
-    myTeam = document.getElementById('team-select').value;
-    alert("¡Registrado! Espera a que el profesor inicie la partida.");
-}
-
-function endMatch() {
-    document.getElementById('game-area').classList.add('hidden');
-    document.getElementById('results').classList.remove('hidden');
-    const b = parseInt(document.getElementById('score-b').innerText);
-    const i = parseInt(document.getElementById('score-i').innerText);
-    document.getElementById('winner-text').innerText = b > i ? "🏆 ¡GANARON LAS BONDIOLAS!" : i > b ? "🏆 ¡GANÓ EL IMPERIO!" : "🤝 ¡EMPATE!";
-}
-
-// ... (La función render() y ans() siguen igual) ...
 
     function render() {
         const list = document.getElementById('questions-list');
+        list.innerHTML = ""; // Asegurar que esté vacío
         questions.forEach((q, i) => {
-            let h = `<div class="question" id="q${i}"><p>${i+1}. ${q.q}</p>`;
+            let h = `<div class="question" id="q${i}"><p>${i + 1}. ${q.q}</p>`;
             q.a.forEach((opt, idx) => {
                 h += `<label class="option-label"><input type="radio" name="q${i}" onclick="ans(${i},${idx})"> <span>${opt}</span></label>`;
             });
@@ -173,30 +171,26 @@ function endMatch() {
 
     function ans(qI, choice) {
         const d = document.getElementById(`q${qI}`);
+        if (d.classList.contains('answered')) return;
+        
         d.classList.add('answered');
-        if(choice === questions[qI].c) {
+        if (choice === questions[qI].c) {
             d.style.borderColor = "#00b894";
+            d.style.background = "#eafaf1";
             db.ref('scores/' + myTeam).transaction(v => (v || 0) + 1);
         } else {
             d.style.borderColor = "#fab1a0";
+            d.style.background = "#fff5f5";
         }
     }
 
-    function timer(s) {
-        let t = s;
-        const inv = setInterval(() => {
-            let m = Math.floor(t / 60), sec = t % 60;
-            document.getElementById('timer').innerText = `${m}:${sec<10?'0'+sec:sec}`;
-            if(--t < 0) { clearInterval(inv); end(); }
-        }, 1000);
-    }
-
-    function end() {
+    function showFinalResults() {
         document.getElementById('game-area').classList.add('hidden');
         document.getElementById('results').classList.remove('hidden');
         const b = parseInt(document.getElementById('score-b').innerText);
         const i = parseInt(document.getElementById('score-i').innerText);
-        document.getElementById('winner-text').innerText = b > i ? "🏆 ¡GANARON LAS BONDIOLAS!" : i > b ? "🏆 ¡GANÓ EL IMPERIO!" : "🤝 ¡EMPATE!";
+        let msg = b > i ? "🏆 GANARON LAS BONDIOLAS" : i > b ? "🏆 GANÓ EL IMPERIO" : "🤝 EMPATE";
+        document.getElementById('winner-text').innerText = msg;
     }
 </script>
 </body>
