@@ -102,21 +102,63 @@
         { q: "¿Internet olvida lo que subes?", a: ["Sí, a los dos días", "No, lo digital es casi permanente", "Solo si borras el historial"], c: 1 }
     ];
 
-    let myTeam = "";
-    db.ref('scores').on('value', s => {
-        const val = s.val() || { Bondiolas: 0, Imperio: 0 };
-        document.getElementById('score-b').innerText = val.Bondiolas || 0;
-        document.getElementById('score-i').innerText = val.Imperio || 0;
-    });
+    // ... (Configuración de Firebase y lista de preguntas igual) ...
 
-    function startGame() {
-        if(!document.getElementById('username').value) return alert("¡Pon un nombre!");
-        myTeam = document.getElementById('team-select').value;
-        document.getElementById('setup').classList.add('hidden');
-        document.getElementById('game-area').classList.remove('hidden');
-        render();
-        timer(300);
+let gameStarted = false;
+
+// ESCUCHAR ESTADO DEL JUEGO Y TIEMPO
+db.ref('/').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if(!data) return;
+
+    // Actualizar Puntajes
+    document.getElementById('score-b').innerText = data.scores?.Bondiolas || 0;
+    document.getElementById('score-i').innerText = data.scores?.Imperio || 0;
+
+    // Controlar el Reloj Sincrónico
+    if (data.gameState === "playing") {
+        if (!gameStarted) {
+            // Si el admin dio inicio, mostramos el juego
+            document.getElementById('setup').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            if(document.getElementById('questions-list').innerHTML === "") render();
+            gameStarted = true;
+        }
+        
+        // Sincronizar Reloj
+        const now = Date.now();
+        const remaining = Math.round((data.endTime - now) / 1000);
+        
+        if (remaining > 0) {
+            let m = Math.floor(remaining / 60), s = remaining % 60;
+            document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
+        } else {
+            endMatch(); // El tiempo se acabó para todos
+        }
+    } else {
+        // Si el estado es "waiting", volvemos al inicio o mostramos resultados
+        gameStarted = false;
     }
+});
+
+function startGame() {
+    // El alumno ahora solo se "anota", el juego empezará solo cuando tú lo inicies
+    const user = document.getElementById('username').value;
+    if(!user) return alert("¡Pon tu nombre!");
+    myTeam = document.getElementById('team-select').value;
+    alert("¡Registrado! Espera a que el profesor inicie la partida.");
+}
+
+function endMatch() {
+    document.getElementById('game-area').classList.add('hidden');
+    document.getElementById('results').classList.remove('hidden');
+    const b = parseInt(document.getElementById('score-b').innerText);
+    const i = parseInt(document.getElementById('score-i').innerText);
+    document.getElementById('winner-text').innerText = b > i ? "🏆 ¡GANARON LAS BONDIOLAS!" : i > b ? "🏆 ¡GANÓ EL IMPERIO!" : "🤝 ¡EMPATE!";
+}
+
+// ... (La función render() y ans() siguen igual) ...
 
     function render() {
         const list = document.getElementById('questions-list');
