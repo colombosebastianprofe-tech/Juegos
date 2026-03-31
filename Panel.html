@@ -9,67 +9,70 @@
 
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #2d3436; color: white; text-align: center; padding: 50px 20px; }
-        .panel-card { max-width: 400px; margin: auto; background: #353b48; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        h1 { color: #00b894; }
-        .btn-reset { 
-            background: #d63031; 
-            color: white; 
-            border: none; 
-            padding: 15px 30px; 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            margin-top: 20px;
-            box-shadow: 0 4px 0 #8e1c1c;
+        .panel-card { max-width: 450px; margin: auto; background: #353b48; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        h1 { color: #00b894; margin-bottom: 20px; }
+        input { padding: 12px; border-radius: 8px; border: none; margin-bottom: 20px; width: 80%; text-align: center; font-size: 1.1rem; }
+        .btn { 
+            width: 90%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; 
+            font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        .btn-reset:active { transform: translateY(3px); box-shadow: none; }
-        input { padding: 10px; border-radius: 5px; border: none; margin-bottom: 10px; width: 80%; text-align: center; font-size: 1.1rem; }
-        .status { margin-top: 20px; font-style: italic; color: #aaa; }
+        .btn-start { background: #0984e3; color: white; box-shadow: 0 4px 0 #06528e; }
+        .btn-reset { background: #d63031; color: white; box-shadow: 0 4px 0 #8e1c1c; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
     </style>
 </head>
 <body>
 
 <div class="panel-card">
     <h1>👑 Panel de Control</h1>
-    <p>Introduce el PIN para resetear los puntajes</p>
-    
     <input type="password" id="pin" placeholder="PIN de Seguridad">
-    <br>
-    <button class="btn-reset" onclick="resetScores()">RESETEAR MARCADOR A 0</button>
     
-    <div class="status" id="status">Esperando acción...</div>
+    <button class="btn btn-start" onclick="startMatch()">🚀 INICIAR PARTIDA (5 MIN)</button>
+    <button class="btn btn-reset" onclick="resetScores()">🛑 RESETEAR / DETENER TODO</button>
+    
+    <p id="status" style="margin-top: 20px; color: #aaa;">Esperando orden...</p>
 </div>
-<script>
-    // ... (Mantén tu configuración de Firebase igual) ...
 
-    function resetScores() {
-        const pin = document.getElementById('pin').value;
-        if (pin === "1234") {
-            // Seteamos puntos a 0 y detenemos cualquier juego activo
-            db.ref('/').update({
-                scores: { Bondiolas: 0, Imperio: 0 },
-                gameState: "waiting",
-                endTime: 0
-            }).then(() => alert("Marcador reseteado y juego detenido."));
-        } else { alert("PIN Incorrecto"); }
-    }
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDRy05apGD1fffZlhjj6O5Z4R1epkxNJcM",
+        authDomain: "duelodigital-4e16c.firebaseapp.com",
+        databaseURL: "https://duelodigital-4e16c-default-rtdb.firebaseio.com",
+        projectId: "duelodigital-4e16c",
+        storageBucket: "duelodigital-4e16c.firebasestorage.app",
+        messagingSenderId: "547123191686",
+        appId: "1:547123191686:web:9b7dcbb31cb956d35cd607"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     function startMatch() {
         const pin = document.getElementById('pin').value;
         if (pin === "1234") {
-            const durationInSeconds = 300; // 5 minutos
-            const endTime = Date.now() + (durationInSeconds * 1000);
-            
-            // Publicamos en Firebase que el juego EMPEZÓ y cuándo TERMINA
+            const endTime = Date.now() + (300 * 1000); // 5 minutos exactos
             db.ref('/').update({
                 gameState: "playing",
                 endTime: endTime,
-                scores: { Bondiolas: 0, Imperio: 0 } // Opcional: resetear al empezar
-            }).then(() => alert("¡PARTIDA INICIADA EN TODOS LOS DISPOSITIVOS!"));
+                scores: { Bondiolas: 0, Imperio: 0 }
+            }).then(() => {
+                document.getElementById('status').innerText = "✅ ¡Juego iniciado!";
+            });
+        } else { alert("PIN Incorrecto"); }
+    }
+
+    function resetScores() {
+        const pin = document.getElementById('pin').value;
+        if (pin === "1234") {
+            db.ref('/').update({
+                gameState: "waiting",
+                endTime: 0,
+                scores: { Bondiolas: 0, Imperio: 0 }
+            }).then(() => {
+                document.getElementById('status').innerText = "🛑 Todo reseteado.";
+            });
         } else { alert("PIN Incorrecto"); }
     }
 </script>
-
-<button class="btn-main" style="background: #0984e3;" onclick="startMatch()">🚀 INICIAR PARTIDA (5 MIN)</button>
-<button class="btn-reset" onclick="resetScores()">🛑 RESETEAR / DETENER</button>
+</body>
+</html>
