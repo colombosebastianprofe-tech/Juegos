@@ -1,33 +1,168 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duelo Digital: Bondiolas vs Imperio</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDRy05apGD1fffZlhjj6O5Z4R1epkxNJcM",
-  authDomain: "duelodigital-4e16c.firebaseapp.com",
-  databaseURL: "https://duelodigital-4e16c-default-rtdb.firebaseio.com",
-  projectId: "duelodigital-4e16c",
-  storageBucket: "duelodigital-4e16c.firebasestorage.app",
-  messagingSenderId: "547123191686",
-  appId: "1:547123191686:web:9b7dcbb31cb956d35cd607",
-  measurementId: "G-1EN5JJH1Z4"
-};
+    <style>
+        :root { --bondiolas: #ff6b6b; --imperio: #4834d4; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); text-align: center; margin: 0; padding: 20px; color: #2d3436; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .scoreboard { display: flex; justify-content: space-around; margin: 20px 0; font-size: 2.2rem; font-weight: bold; background: #f8f9fa; padding: 15px; border-radius: 15px; border: 2px solid #eee; }
+        .team-b { color: var(--bondiolas); }
+        .team-i { color: var(--imperio); }
+        .hidden { display: none; }
+        .question { text-align: left; background: #fff; padding: 20px; margin: 15px 0; border-radius: 12px; border: 1px solid #e0e0e0; transition: 0.3s; }
+        .answered { opacity: 0.5; pointer-events: none; transform: scale(0.98); }
+        .timer { font-size: 3rem; color: #e74c3c; font-weight: 900; margin-bottom: 10px; font-family: monospace; }
+        button { padding: 15px 30px; cursor: pointer; border-radius: 10px; border: none; background: #27ae60; color: white; font-size: 1.2rem; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #219150; transform: translateY(-2px); }
+        input, select { padding: 12px; margin: 10px; border-radius: 8px; border: 2px solid #ddd; width: 80%; font-size: 1rem; }
+        label { display: block; padding: 10px; margin: 5px 0; background: #f1f2f6; border-radius: 8px; cursor: pointer; }
+        label:hover { background: #dfe4ea; }
+    </style>
+</head>
+<body>
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const firebaseConfig = {
+<div class="container">
+    <h1>⚔️ Duelo de Ciudadanía Digital</h1>
+    
+    <div id="setup">
+        <p>Ingresa tu nombre y elige bando para comenzar</p>
+        <input type="text" id="username" placeholder="Tu Apodo / Nombre">
+        <select id="team-select">
+            <option value="Bondiolas">Equipo Bondiolas 🥩</option>
+            <option value="Imperio">Equipo Imperio 👑</option>
+        </select>
+        <br><br>
+        <button onclick="startGame()">¡ENTRAR AL JUEGO!</button>
+    </div>
+
+    <div id="game-area" class="hidden">
+        <div class="timer" id="timer">05:00</div>
+        <div class="scoreboard">
+            <div class="team-b">🥩 <span id="score-b">0</span></div>
+            <div class="team-i">👑 <span id="score-i">0</span></div>
+        </div>
+        <div id="questions-list"></div>
+    </div>
+
+    <div id="results" class="hidden">
+        <h2>🏆 RESULTADOS FINALES</h2>
+        <div id="winner-text" style="font-size: 2.5rem; margin: 20px 0;"></div>
+        <button onclick="location.reload()">Jugar de nuevo</button>
+    </div>
+</div>
+
+<script>
+    // TUS DATOS DE FIREBASE (CONFIGURADOS)
+    const firebaseConfig = {
         apiKey: "AIzaSyDRy05apGD1fffZlhjj6O5Z4R1epkxNJcM",
         authDomain: "duelodigital-4e16c.firebaseapp.com",
-        databaseURL: "https://duelodigital-4e16c-default-rtdb.firebaseio.com", // IMPORTANTE: fíjate que termine en .com
+        databaseURL: "https://duelodigital-4e16c-default-rtdb.firebaseio.com",
         projectId: "duelodigital-4e16c",
         storageBucket: "duelodigital-4e16c.firebasestorage.app",
         messagingSenderId: "547123191686",
-        appId: "1:547123191686:web:9b7dcbb31cb956d35cd607",
-        measurementId: "G-1EN5JJH1Z4"
+        appId: "1:547123191686:web:9b7dcbb31cb956d35cd607"
     };
-    // ---------------------------------------
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // BANCO DE PREGUNTAS
+    const questions = [
+        { q: "¿Qué es el Grooming?", a: ["Un deporte digital", "Acoso de un adulto a un menor en red", "Actualizar el software"], c: 1 },
+        { q: "¿Es seguro publicar fotos de tu uniforme escolar?", a: ["Sí, para que vean mi escuela", "No, revela datos de mi ubicación y rutina", "Solo si salgo bien"], c: 1 },
+        { q: "La 'Huella Digital' es:", a: ["Lo que desbloquea el celu", "El rastro de lo que haces en internet", "Una marca de mouse"], c: 1 },
+        { q: "Si recibes un link raro de un amigo por WhatsApp:", a: ["Abro para ver qué es", "No lo abro y le pregunto por otro medio", "Se lo reenvío a todos"], c: 1 },
+        { q: "¿Qué es el Ciberbullying?", a: ["Insultar a alguien por redes", "Un videojuego de peleas", "Tener muchos seguidores"], c: 0 },
+        { q: "Una contraseña segura debería tener:", a: ["Solo números", "Tu nombre y 123", "Letras, números y símbolos"], c: 2 },
+        { q: "¿Qué significa 'Privacidad' en redes?", a: ["Que todos vean todo", "Controlar quién ve mi información", "No tener seguidores"], c: 1 },
+        { q: "Si alguien te insulta en un juego online:", a: ["Le devuelvo el insulto", "Lo bloqueo y reporto", "Dejo de jugar para siempre"], c: 1 },
+        { q: "¿Qué son las Fake News?", a: ["Noticias de famosos", "Información falsa que parece real", "Chistes de internet"], c: 1 },
+        { q: "El 'Sharenting' es cuando:", a: ["Padres publican fotos de hijos sin permiso", "Compartes archivos pesados", "Prestas tu cuenta de Netflix"], c: 0 }
+    ];
+    // Rellenar con más hasta 20 para el ejemplo
+    for(let i=11; i<=20; i++) {
+        questions.push({ q: `Pregunta de Ciudadanía Digital #${i}: ¿Es importante proteger tus datos?`, a: ["Sí, siempre", "No mucho", "Depende el día"], c: 0 });
+    }
+
+    let currentUserTeam = "";
+
+    // ESCUCHAR PUNTAJES EN VIVO
+    db.ref('scores').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            document.getElementById('score-b').innerText = data.Bondiolas || 0;
+            document.getElementById('score-i').innerText = data.Imperio || 0;
+        }
+    });
+
+    function startGame() {
+        const user = document.getElementById('username').value;
+        if(!user) return alert("¡Escribe un nombre de usuario!");
+        
+        currentUserTeam = document.getElementById('team-select').value;
+        document.getElementById('setup').classList.add('hidden');
+        document.getElementById('game-area').classList.remove('hidden');
+        
+        renderQuestions();
+        startTimer(300); // 5 minutos
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questions-list');
+        questions.forEach((q, index) => {
+            let html = `<div class="question" id="q${index}"><p><strong>${index+1}. ${q.q}</strong></p>`;
+            q.a.forEach((opt, i) => {
+                html += `<label><input type="radio" name="q${index}" onclick="handleAnswer(${index}, ${i})"> ${opt}</label>`;
+            });
+            container.innerHTML += html + `</div>`;
+        });
+    }
+
+    function handleAnswer(qIdx, choice) {
+        const div = document.getElementById(`q${qIdx}`);
+        div.classList.add('answered');
+        
+        if(choice === questions[qIdx].c) {
+            div.style.borderLeft = "10px solid #2ecc71";
+            div.style.background = "#eafaf1";
+            // Sumar punto en Firebase
+            db.ref('scores/' + currentUserTeam).transaction((val) => (val || 0) + 1);
+        } else {
+            div.style.borderLeft = "10px solid #e74c3c";
+            div.style.background = "#fdedec";
+        }
+    }
+
+    function startTimer(seconds) {
+        let t = seconds;
+        const interval = setInterval(() => {
+            let m = Math.floor(t / 60);
+            let s = t % 60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            if (--t < 0) {
+                clearInterval(interval);
+                showResults();
+            }
+        }, 1000);
+    }
+
+    function showResults() {
+        document.getElementById('game-area').classList.add('hidden');
+        document.getElementById('results').classList.remove('hidden');
+        const sB = parseInt(document.getElementById('score-b').innerText);
+        const sI = parseInt(document.getElementById('score-i').innerText);
+        
+        let msg = sB > sI ? "¡GANARON LAS BONDIOLAS! 🥩" : sI > sB ? "¡GANÓ EL IMPERIO! 👑" : "¡EMPATE TÉCNICO! 🤝";
+        document.getElementById('winner-text').innerText = msg;
+    }
+</script>
+</body>
+</html>
