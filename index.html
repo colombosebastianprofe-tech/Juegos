@@ -4,145 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Duelo Digital: Bondiolas vs Imperio</title>
-    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { 
-            --bondiolas: #d63031; 
-            --imperio: #0984e3; 
-            --bg: #dfe6e9; 
-        }
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg); 
-            margin: 0; 
-            padding: 10px; 
-            color: #2d3436; 
-        }
-        .container { 
-            max-width: 600px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
-        }
-        h1 { color: #2d3436; font-size: 1.8rem; margin-bottom: 10px; }
-        
-        /* Marcador */
-        .scoreboard { 
-            display: flex; 
-            justify-content: space-around; 
-            margin: 20px 0; 
-            background: #2d3436; 
-            padding: 15px; 
-            border-radius: 15px; 
-            color: white;
-        }
+        :root { --bondiolas: #d63031; --imperio: #0984e3; --bg: #dfe6e9; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        .container { max-width: 600px; margin: 20px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; }
+        .scoreboard { display: flex; justify-content: space-around; margin: 20px 0; background: #2d3436; padding: 15px; border-radius: 15px; color: white; }
         .score-box { text-align: center; }
         .score-val { font-size: 2.5rem; display: block; font-weight: 900; }
-        .score-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Timer */
-        .timer-wrapper { margin-bottom: 20px; }
-        #timer { font-size: 3rem; font-weight: 900; color: #eb4d4b; font-family: 'Courier New', Courier, monospace; }
-
-        /* Preguntas */
-        .question { 
-            text-align: left; 
-            background: #f9f9f9; 
-            padding: 15px; 
-            margin: 15px 0; 
-            border-radius: 12px; 
-            border: 1px solid #eee; 
-            transition: all 0.3s ease;
-        }
+        .score-label { font-size: 0.8rem; text-transform: uppercase; }
+        #timer { font-size: 3rem; font-weight: 900; color: #eb4d4b; font-family: monospace; }
+        .question { text-align: left; background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #eee; }
         .question p { margin-top: 0; font-weight: bold; font-size: 1.1rem; }
         .answered { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
-
-        /* Inputs y Botones */
-        input, select { 
-            width: 90%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border-radius: 10px; 
-            border: 2px solid #ddd; 
-            font-size: 1rem; 
-        }
-        .btn-main { 
-            padding: 15px 40px; 
-            background: #00b894; 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            cursor: pointer; 
-            box-shadow: 0 4px 0 #009475;
-        }
-        .btn-main:active { transform: translateY(3px); box-shadow: none; }
-
-        /* Opciones de respuesta */
+        input[type="text"], select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 2px solid #ddd; }
+        .btn-main { padding: 15px 40px; background: #00b894; color: white; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+        
+        /* AQUÍ ESTÁ EL ARREGLO DEL TEXTO */
         .option-label {
-            display: block;
+            display: flex; 
+            align-items: center; 
+            text-align: left; 
             background: white;
             padding: 12px;
             margin: 8px 0;
             border-radius: 8px;
             border: 2px solid #eee;
             cursor: pointer;
-            transition: 0.2s;
         }
-        .option-label:hover { background: #f1f2f6; border-color: #ccc; }
-        
+        .option-label input {
+            width: auto;
+            margin: 0 15px 0 5px; /* Margen a los costados del circulito */
+        }
         .hidden { display: none; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div id="setup">
         <h1>🛡️ Ciudadanía Digital</h1>
-        <p>¡Defiende a tu equipo respondiendo correctamente!</p>
         <input type="text" id="username" placeholder="Tu Apodo">
         <select id="team-select">
             <option value="Bondiolas">🥩 Equipo Bondiolas</option>
             <option value="Imperio">👑 Equipo Imperio</option>
-        </select>
-        <br><br>
+        </select><br><br>
         <button class="btn-main" onclick="startGame()">¡A JUGAR!</button>
     </div>
-
     <div id="game-area" class="hidden">
-        <div class="timer-wrapper">
-            <div id="timer">05:00</div>
-        </div>
-
+        <div id="timer">05:00</div>
         <div class="scoreboard">
-            <div class="score-box" style="color: var(--bondiolas)">
-                <span class="score-label">Bondiolas</span>
-                <span id="score-b" class="score-val">0</span>
-            </div>
-            <div class="score-box" style="color: var(--imperio)">
-                <span class="score-label">Imperio</span>
-                <span id="score-i" class="score-val">0</span>
-            </div>
+            <div class="score-box" style="color: var(--bondiolas)"><span class="score-label">Bondiolas</span><span id="score-b" class="score-val">0</span></div>
+            <div class="score-box" style="color: var(--imperio)"><span class="score-label">Imperio</span><span id="score-i" class="score-val">0</span></div>
         </div>
-
         <div id="questions-list"></div>
     </div>
-
     <div id="results" class="hidden">
-        <h1>🏁 ¡FIN DEL TIEMPO!</h1>
-        <div id="winner-text" style="font-size: 2rem; margin: 20px 0; font-weight: 900;"></div>
-        <button class="btn-main" style="background: #636e72; box-shadow: 0 4px 0 #2d3436;" onclick="location.reload()">Reiniciar Batalla</button>
+        <h1 id="winner-text"></h1>
+        <button class="btn-main" onclick="location.reload()">Reiniciar</button>
     </div>
 </div>
 
 <script>
-    // CONFIGURACIÓN DE TU FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyDRy05apGD1fffZlhjj6O5Z4R1epkxNJcM",
         authDomain: "duelodigital-4e16c.firebaseapp.com",
@@ -152,7 +76,6 @@
         messagingSenderId: "547123191686",
         appId: "1:547123191686:web:9b7dcbb31cb956d35cd607"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -180,9 +103,7 @@
     ];
 
     let myTeam = "";
-
-    // Sincronización en tiempo real
-    db.ref('scores').on('value', (s) => {
+    db.ref('scores').on('value', s => {
         const val = s.val() || { Bondiolas: 0, Imperio: 0 };
         document.getElementById('score-b').innerText = val.Bondiolas || 0;
         document.getElementById('score-i').innerText = val.Imperio || 0;
@@ -202,7 +123,7 @@
         questions.forEach((q, i) => {
             let h = `<div class="question" id="q${i}"><p>${i+1}. ${q.q}</p>`;
             q.a.forEach((opt, idx) => {
-                h += `<label class="option-label"><input type="radio" name="q${i}" onclick="ans(${i},${idx})"> ${opt}</label>`;
+                h += `<label class="option-label"><input type="radio" name="q${i}" onclick="ans(${i},${idx})"> <span>${opt}</span></label>`;
             });
             list.innerHTML += h + `</div>`;
         });
@@ -233,7 +154,7 @@
         document.getElementById('results').classList.remove('hidden');
         const b = parseInt(document.getElementById('score-b').innerText);
         const i = parseInt(document.getElementById('score-i').innerText);
-        document.getElementById('winner-text').innerText = b > i ? "🏆 ¡VICTORIA DE LAS BONDIOLAS!" : i > b ? "🏆 ¡VICTORIA DEL IMPERIO!" : "🤝 ¡EMPATE ÉPICO!";
+        document.getElementById('winner-text').innerText = b > i ? "🏆 ¡GANARON LAS BONDIOLAS!" : i > b ? "🏆 ¡GANÓ EL IMPERIO!" : "🤝 ¡EMPATE!";
     }
 </script>
 </body>
