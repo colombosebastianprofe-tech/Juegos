@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Duelo Digital</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; color: white; text-align: center; padding: 50px 20px; }
+        .panel-card { max-width: 400px; margin: auto; background: #353b48; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        h1 { color: #00b894; }
+        .btn-reset { 
+            background: #d63031; 
+            color: white; 
+            border: none; 
+            padding: 15px 30px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            margin-top: 20px;
+            box-shadow: 0 4px 0 #8e1c1c;
+        }
+        .btn-reset:active { transform: translateY(3px); box-shadow: none; }
+        input { padding: 10px; border-radius: 5px; border: none; margin-bottom: 10px; width: 80%; text-align: center; font-size: 1.1rem; }
+        .status { margin-top: 20px; font-style: italic; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<div class="panel-card">
+    <h1>👑 Panel de Control</h1>
+    <p>Introduce el PIN para resetear los puntajes</p>
+    
+    <input type="password" id="pin" placeholder="PIN de Seguridad">
+    <br>
+    <button class="btn-reset" onclick="resetScores()">RESETEAR MARCADOR A 0</button>
+    
+    <div class="status" id="status">Esperando acción...</div>
+</div>
+
+<script>
+    // TUS DATOS DE FIREBASE (Los mismos que en index.html)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDRy05apGD1fffZlhjj6O5Z4R1epkxNJcM",
+        authDomain: "duelodigital-4e16c.firebaseapp.com",
+        databaseURL: "https://duelodigital-4e16c-default-rtdb.firebaseio.com",
+        projectId: "duelodigital-4e16c",
+        storageBucket: "duelodigital-4e16c.firebasestorage.app",
+        messagingSenderId: "547123191686",
+        appId: "1:547123191686:web:9b7dcbb31cb956d35cd607"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function resetScores() {
+        const pin = document.getElementById('pin').value;
+        const status = document.getElementById('status');
+
+        // AQUÍ ELIGES TU CONTRASEÑA (Cámbiala por la que quieras)
+        if (pin === "1234") { 
+            if(confirm("¿Estás seguro de que quieres borrar todos los puntos?")) {
+                db.ref('scores').set({
+                    Bondiolas: 0,
+                    Imperio: 0
+                }).then(() => {
+                    status.innerText = "✅ ¡Marcador reseteado con éxito!";
+                    status.style.color = "#00b894";
+                    document.getElementById('pin').value = "";
+                }).catch((error) => {
+                    status.innerText = "❌ Error: " + error.message;
+                    status.style.color = "#d63031";
+                });
+            }
+        } else {
+            alert("PIN Incorrecto. Intenta de nuevo.");
+        }
+    }
+</script>
+</body>
+</html>
