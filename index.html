@@ -7,39 +7,100 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
-    <style>
-        :root { --bondiolas: #d63031; --imperio: #0984e3; --bg: #dfe6e9; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .container { max-width: 600px; margin: 20px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; }
-        .scoreboard { display: flex; justify-content: space-around; margin: 20px 0; background: #2d3436; padding: 15px; border-radius: 15px; color: white; }
-        .score-box { text-align: center; }
-        .score-val { font-size: 2.5rem; display: block; font-weight: 900; }
-        .score-label { font-size: 0.8rem; text-transform: uppercase; }
-        #timer { font-size: 3rem; font-weight: 900; color: #eb4d4b; font-family: monospace; }
-        .question { text-align: left; background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #eee; }
-        .question p { margin-top: 0; font-weight: bold; font-size: 1.1rem; }
-        .answered { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
-        input[type="text"], select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 2px solid #ddd; }
-        .btn-main { padding: 15px 40px; background: #00b894; color: white; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
-        
-        /* AQUÍ ESTÁ EL ARREGLO DEL TEXTO */
-        .option-label {
-            display: flex; 
-            align-items: center; 
-            text-align: left; 
-            background: white;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 2px solid #eee;
-            cursor: pointer;
-        }
-        .option-label input {
-            width: auto;
-            margin: 0 15px 0 5px; /* Margen a los costados del circulito */
-        }
-        .hidden { display: none; }
-    </style>
+   <style>
+    :root { 
+        --bondiolas: #d63031; 
+        --imperio: #0984e3; 
+        --bg: #dfe6e9; 
+    }
+    body { 
+        font-family: 'Segoe UI', Arial, sans-serif; 
+        background: var(--bg); 
+        margin: 0; 
+        padding: 0; /* Quitamos el padding del body para que el marcador pegue al borde */
+    }
+    .container { 
+        max-width: 600px; 
+        margin: auto; 
+        background: white; 
+        min-height: 100vh;
+        padding-bottom: 50px;
+    }
+
+    /* --- ESTO ES LO QUE BUSCAS: EL MARCADOR FIJO --- */
+    .sticky-header {
+        position: -webkit-sticky; /* Soporte para Safari */
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1000;
+        padding: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-bottom: 2px solid #eee;
+    }
+
+    .scoreboard { 
+        display: flex; 
+        justify-content: space-around; 
+        background: #2d3436; 
+        padding: 10px; 
+        border-radius: 12px; 
+        color: white; 
+        margin-top: 5px;
+    }
+    .score-box { text-align: center; }
+    .score-val { font-size: 2rem; display: block; font-weight: 900; line-height: 1; }
+    .score-label { font-size: 0.7rem; text-transform: uppercase; }
+    
+    #timer { 
+        font-size: 2.5rem; 
+        font-weight: 900; 
+        color: #eb4d4b; 
+        font-family: monospace; 
+        margin-bottom: 5px;
+    }
+    /* ----------------------------------------------- */
+
+    .game-content { padding: 15px; }
+    
+    .question { 
+        text-align: left; 
+        background: #f9f9f9; 
+        padding: 15px; 
+        margin: 15px 0; 
+        border-radius: 12px; 
+        border: 1px solid #eee; 
+    }
+    .question p { margin-top: 0; font-weight: bold; font-size: 1.1rem; }
+    .answered { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
+    
+    .option-label {
+        display: flex; 
+        align-items: center; 
+        text-align: left; 
+        background: white;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 8px;
+        border: 2px solid #eee;
+        cursor: pointer;
+    }
+    .option-label input { width: auto; margin: 0 15px 0 5px; }
+    
+    .btn-main { 
+        padding: 15px 40px; 
+        background: #00b894; 
+        color: white; 
+        border: none; 
+        border-radius: 12px; 
+        font-size: 1.2rem; 
+        font-weight: bold; 
+        cursor: pointer;
+        margin-top: 20px;
+    }
+    .hidden { display: none; }
+    h1 { font-size: 1.5rem; padding-top: 20px; }
+</style>
 </head>
 <body>
 <div class="container">
@@ -53,13 +114,24 @@
         <button class="btn-main" onclick="startGame()">¡A JUGAR!</button>
     </div>
     <div id="game-area" class="hidden">
+    <div class="sticky-header">
         <div id="timer">05:00</div>
         <div class="scoreboard">
-            <div class="score-box" style="color: var(--bondiolas)"><span class="score-label">Bondiolas</span><span id="score-b" class="score-val">0</span></div>
-            <div class="score-box" style="color: var(--imperio)"><span class="score-label">Imperio</span><span id="score-i" class="score-val">0</span></div>
+            <div class="score-box" style="color: var(--bondiolas)">
+                <span class="score-label">Bondiolas</span>
+                <span id="score-b" class="score-val">0</span>
+            </div>
+            <div class="score-box" style="color: var(--imperio)">
+                <span class="score-label">Imperio</span>
+                <span id="score-i" class="score-val">0</span>
+            </div>
         </div>
+    </div>
+
+    <div class="game-content">
         <div id="questions-list"></div>
     </div>
+</div>
     <div id="results" class="hidden">
         <h1 id="winner-text"></h1>
         <button class="btn-main" onclick="location.reload()">Reiniciar</button>
