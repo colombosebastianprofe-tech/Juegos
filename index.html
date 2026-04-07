@@ -11,25 +11,44 @@
     :root { 
         --bondiolas: #d63031; 
         --imperio: #0984e3; 
-        --bg: #dfe6e9; 
-    }
-    body { 
-        font-family: 'Segoe UI', Arial, sans-serif; 
-        background: var(--bg); 
-        margin: 0; 
-        padding: 0; /* Quitamos el padding del body para que el marcador pegue al borde */
-    }
-    .container { 
-        max-width: 600px; 
-        margin: auto; 
-        background: white; 
-        min-height: 100vh;
-        padding-bottom: 50px;
     }
 
-    /* --- ESTO ES LO QUE BUSCAS: EL MARCADOR FIJO --- */
+    /* FONDO CON ANIMACIÓN DE DEGRADADO */
+    body { 
+        font-family: 'Segoe UI', Arial, sans-serif; 
+        margin: 0; 
+        padding: 0;
+        min-height: 100vh;
+        display: flex; /* Para centrar el contenedor */
+        justify-content: center;
+        align-items: flex-start; /* Permite scroll si hay muchas preguntas */
+        background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* CONTENEDOR CENTRADO */
+    .container { 
+        width: 100%;
+        max-width: 600px; 
+        margin: 20px; /* Margen para que no pegue a los bordes en móviles */
+        background: rgba(255, 255, 255, 0.95); /* Un toque de transparencia */
+        min-height: 90vh;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* MARCADOR FIJO */
     .sticky-header {
-        position: -webkit-sticky; /* Soporte para Safari */
         position: sticky;
         top: 0;
         background: white;
@@ -37,6 +56,7 @@
         padding: 15px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         border-bottom: 2px solid #eee;
+        text-align: center;
     }
 
     .scoreboard { 
@@ -48,7 +68,8 @@
         color: white; 
         margin-top: 5px;
     }
-    .score-box { text-align: center; }
+    
+    .score-box { text-align: center; flex: 1; }
     .score-val { font-size: 2rem; display: block; font-weight: 900; line-height: 1; }
     .score-label { font-size: 0.7rem; text-transform: uppercase; }
     
@@ -59,48 +80,76 @@
         font-family: monospace; 
         margin-bottom: 5px;
     }
-    /* ----------------------------------------------- */
 
-    .game-content { padding: 15px; }
+    /* CONTENIDO DEL JUEGO */
+    .game-content { padding: 20px; }
     
     .question { 
         text-align: left; 
-        background: #f9f9f9; 
-        padding: 15px; 
+        background: #ffffff; 
+        padding: 18px; 
         margin: 15px 0; 
-        border-radius: 12px; 
-        border: 1px solid #eee; 
+        border-radius: 15px; 
+        border: 2px solid #f1f2f6; 
+        transition: 0.3s;
     }
-    .question p { margin-top: 0; font-weight: bold; font-size: 1.1rem; }
-    .answered { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
+
+    .answered { opacity: 0.5; pointer-events: none; transform: scale(0.98); }
     
     .option-label {
         display: flex; 
         align-items: center; 
         text-align: left; 
-        background: white;
-        padding: 12px;
-        margin: 8px 0;
-        border-radius: 8px;
+        background: #f8f9fa;
+        padding: 14px;
+        margin: 10px 0;
+        border-radius: 10px;
         border: 2px solid #eee;
         cursor: pointer;
+        transition: 0.2s;
     }
-    .option-label input { width: auto; margin: 0 15px 0 5px; }
+
+    .option-label:hover { background: #e9ecef; }
+    .option-label input { width: auto; margin-right: 15px; }
     
+    /* PANTALLA DE INICIO CENTRADA */
+    #setup {
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
+    }
+
     .btn-main { 
-        padding: 15px 40px; 
+        padding: 18px 50px; 
         background: #00b894; 
         color: white; 
         border: none; 
-        border-radius: 12px; 
-        font-size: 1.2rem; 
+        border-radius: 15px; 
+        font-size: 1.3rem; 
         font-weight: bold; 
         cursor: pointer;
-        margin-top: 20px;
+        box-shadow: 0 5px 0 #009475;
+        transition: 0.2s;
     }
+
+    .btn-main:active { transform: translateY(3px); box-shadow: none; }
+    
+    input[type="text"], select { 
+        width: 85%; 
+        padding: 15px; 
+        margin: 12px 0; 
+        border-radius: 12px; 
+        border: 2px solid #dfe6e9;
+        font-size: 1rem;
+    }
+
     .hidden { display: none; }
-    h1 { font-size: 1.5rem; padding-top: 20px; }
+    h1 { color: #2d3436; margin-bottom: 5px; }
 </style>
+    
 </head>
 <body>
 <div class="container">
