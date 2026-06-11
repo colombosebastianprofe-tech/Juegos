@@ -35,7 +35,12 @@
             </div>
             
             <button onclick="iniciarLoginGoogle()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer text-base shadow-lg">
-                <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/copy_of_24dp.png" alt="Google" class="w-5 h-5">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3A11.934 11.934 0 0012 0C7.354 0 3.307 2.482 1.09 6.182l4.176 3.583z"/>
+                    <path fill="#4285F4" d="M23.455 12.273c0-.818-.073-1.609-.209-2.373H12v4.509h6.418a5.485 5.485 0 01-2.382 3.6l4.136 3.209c2.418-2.227 3.81-5.509 3.81-9.445z"/>
+                    <path fill="#FBBC05" d="M5.266 14.235L1.09 17.818A11.934 11.934 0 0012 24c3.236 0 5.955-1.073 7.936-2.918l-4.136-3.21c-1.127.755-2.564 1.21-3.8 1.21-2.945 0-5.436-1.983-6.327-4.655z"/>
+                    <path fill="#34A853" d="M5.266 9.765c-.227.682-.355 1.409-.355 2.173 0 .764.128 1.491.355 2.173l-4.176 3.582A11.962 11.962 0 010 12c0-2.11.545-4.1 1.09-5.818l4.176 3.583z"/>
+                </svg>
                 Ingresar con mi cuenta de Google
             </button>
         </div>
@@ -43,15 +48,19 @@
         <div id="pantalla-bienvenida" class="hidden space-y-5 py-4 text-center">
             <div class="bg-slate-750 p-5 rounded-xl border border-slate-700 space-y-3">
                 <span class="text-4xl block">🚀</span>
-                <h2 class="text-xl font-bold text-white">¡Hola de nuevo!</h2>
-                <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
-                    <p id="bienvenida-usuario" class="text-emerald-400 font-mono font-bold text-base">👤 -</p>
+                <h2 class="text-xl font-bold text-white">¡Te damos la bienvenida al Simulador!</h2>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    A través de esta actividad vas a investigar situaciones cotidianas, detectar posibles fraudes y evaluar cómo manejás tu capital. Cada decisión cuenta.
+                </p>
+                <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700 mt-2">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Perfil Detectado:</p>
+                    <p id="bienvenida-usuario" class="text-emerald-400 font-mono font-bold text-base mt-1">👤 Cargando...</p>
                 </div>
-                <p class="text-xs text-slate-400">¿No sos vos? <button onclick="cerrarSesion()" class="text-red-400 underline cursor-pointer">Cambiar de cuenta</button></p>
+                <p class="text-xs text-slate-400">¿No sos vos? <button onclick="cerrarSesion()" class="text-red-400 underline cursor-pointer font-semibold">Cambiar de cuenta</button></p>
             </div>
             
             <button onclick="comenzarSimulacion()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer text-base shadow-lg shadow-emerald-500/20">
-                Entrar al Simulador
+                Comenzar Simulación
             </button>
         </div>
 
@@ -84,21 +93,62 @@
                 <p id="mensaje-feedback" class="text-xs text-slate-300 mt-3 px-2 leading-relaxed bg-slate-800/50 py-2 rounded-lg border border-slate-700"></p>
             </div>
 
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tabla Oficial de Clasificación:</h3>
+                <div class="space-y-2 text-xs">
+                    <div id="rango-leyenda" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
+                        <div>
+                            <span class="font-bold text-emerald-400 block text-sm">🏆 Inversor Leyenda (30.000 EC o más)</span>
+                            <span class="text-slate-400">Decisiones perfectas. Evitó estafas y licuó deudas con inteligencia.</span>
+                        </div>
+                    </div>
+                    <div id="rango-pro" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
+                        <div>
+                            <span class="font-bold text-sky-400 block text-sm">📈 Planificador Pro (20.000 a 29.999 EC)</span>
+                            <span class="text-slate-400">Gran desempeño. Protegió su dinero y esquivó los mayores peligros.</span>
+                        </div>
+                    </div>
+                    <div id="rango-piloto" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
+                        <div>
+                            <span class="font-bold text-amber-400 block text-sm">⚖️ Piloto de Tormentas (10.000 a 19.999 EC)</span>
+                            <span class="text-slate-400">Empate o ganancia mínima. Cauteloso, pero perdió contra la inflación.</span>
+                        </div>
+                    </div>
+                    <div id="rango-alerta" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
+                        <div>
+                            <span class="font-bold text-orange-400 block text-sm">⚠️ Zona de Alerta (4.500 a 9.999 EC)</span>
+                            <span class="text-slate-400">Decisiones impulsivas, deudas pesadas y nula consulta de costos.</span>
+                        </div>
+                    </div>
+                    <div id="rango-ponzi" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
+                        <div>
+                            <span class="font-bold text-red-400 block text-sm">🚨 Bancarrota / Caída en Ponzi (Menos de 4.500 EC)</span>
+                            <span class="text-slate-400">Cayó en promesas mágicas de redes. Perdió casi todo su capital.</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
     </div>
 
     <script>
-        // CAMBIA ESTO POR TU URL DE APPS SCRIPT ACTUALIZADA
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxi0ChjbIzYtooIs6e_49wl9ECbxXr5dH0gEvL-V2iPdd3690Nk8X2ughU-IHh5HLRNEw/exec";
+        // ==========================================
+        // PONÉ ACÁ TU URL DE DEPLOY DE APPS SCRIPT
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHEej2dNcv5PCKKcZmvqFO-4_5EqOfoFMV_llyjlgyONu7ET7qgxvjNfHX9bcWrfYXQg/exec";
 
-        // [Aquí va el array bancoPreguntas idéntico al anterior]
         const bancoPreguntas = [
             {
                 pregunta: "Cobrás tu primer sueldo por un laburo de fin de semana. No tenés gastos fijos todavía. ¿Qué estrategia armás para arrancar?",
                 consejoAsesor: "El primer paso de la salud financiera no es ganar más, sino armar una red de seguridad (Fondo de Emergencia) equivalente a tus gastos estimados por si pasa algo.",
                 herramientas: [],
-                opciones: [ "Me compro ropa que está de oferta pagando el total ahora.", "Separo el 10% para mi Fondo de Emergencia y planifico el resto.", "Lo dejo en la cuenta sin mirar y voy gastando según pinte." ],
-                correcta: 1,   impacto: 5000
+                opciones: [
+                    "Me compro ropa que está de oferta pagando el total ahora.",
+                    "Separo el 10% para mi Fondo de Emergencia y planifico el resto.",
+                    "Lo dejo en la cuenta sin mirar y voy gastando según pinte."
+                ],
+                correcta: 1,
+                impacto: 5000
             },
             {
                 pregunta: "Querés comprarte una computadora para estudiar. Te falta una parte del dinero. Encontrás opciones en cuotas pero recordás que tenés que mirar el Costo Financiero Total (CFT).",
@@ -107,12 +157,34 @@
                     {
                         texto: "🔍 Ver opciones de compra y CFT",
                         accion: function() {
-                            return `<p class="font-bold text-amber-400 mb-1">📋 Presupuestos de Tiendas:</p><table class="w-full text-xs text-left border-collapse"><thead><tr class="border-b border-slate-700 text-slate-400"><th class="py-1">Tienda</th><th class="py-1">Precio Lista</th><th class="py-1">Financiación</th><th class="py-1 text-emerald-400">CFT Real</th></tr></thead><tbody><tr><td class="py-1">Tienda A</td><td class="py-1">120.000 EC</td><td class="py-1">12 cuotas "fijas"</td><td class="py-1 text-red-400 font-bold">140%</td></tr><tr><td class="py-1">Tienda B</td><td class="py-1">105.000 EC</td><td class="py-1">Precio contado</td><td class="py-1 text-emerald-400 font-bold">0%</td></tr><tr><td class="py-1">Tienda C</td><td class="py-1">115.000 EC</td><td class="py-1">3 cuotas Plan Oficial</td><td class="py-1 text-amber-400 font-bold">35%</td></tr></tbody></table>`;
+                            return `
+                                <p class="font-bold text-amber-400 mb-1">📋 Presupuestos de Tiendas:</p>
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <thead>
+                                        <tr class="border-b border-slate-700 text-slate-400">
+                                            <th class="py-1">Tienda</th>
+                                            <th class="py-1">Precio Lista</th>
+                                            <th class="py-1">Financiación</th>
+                                            <th class="py-1 text-emerald-400">CFT Real</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="py-1">Tienda A</td><td class="py-1">120.000 EC</td><td class="py-1">12 cuotas \"fijas\"</td><td class="py-1 text-red-400 font-bold">140%</td></tr>
+                                        <tr><td class="py-1">Tienda B</td><td class="py-1">105.000 EC</td><td class="py-1">Precio contado</td><td class="py-1 text-emerald-400 font-bold">0%</td></tr>
+                                        <tr><td class="py-1">Tienda C</td><td class="py-1">115.000 EC</td><td class="py-1">3 cuotas Plan Oficial</td><td class="py-1 text-amber-400 font-bold">35%</td></tr>
+                                    </tbody>
+                                </table>
+                            `;
                         }
                     }
                 ],
-                opciones: [ "Comprar en Tienda A porque 12 cuotas parece más cómodo, sin mirar el CFT.", "Esperar a ahorrar lo que falta y pelear precio contado en Tienda B.", "Aprovechar la Tienda C: tasa fija oficial (CFT 35%) muy por debajo de la inflación." ],
-                correcta: 2,  impacto: 7000
+                opciones: [
+                    "Comprar en Tienda A porque 12 cuotas parece más cómodo, sin mirar el CFT.",
+                    "Esperar a ahorrar lo que falta y pelear precio contado en Tienda B.",
+                    "Aprovechar la Tienda C: tasa fija oficial (CFT 35%) muy por debajo de la inflación."
+                ],
+                correcta: 2,
+                impacto: 7000
             },
             {
                 pregunta: "Tenés 20.000 EC guardados para un viaje de estudios en 4 meses. Querés que no pierdan valor frente a la inflación, pero en TikTok viste una app que te promete duplicar tu plata en una semana. ¿Qué hacés?",
@@ -120,11 +192,24 @@
                 herramientas: [
                     {
                         texto: "🏦 Billetera Virtual vs Banco",
-                        accion: function() { return `<p class="font-bold text-sky-400 mb-1">Diferencias clave:</p><ul class="list-disc pl-4 space-y-1 text-xs text-slate-300"><li><strong>Banco (Caja de Ahorros):</strong> Cuenta protegida pero no te da rendimientos si dejás los fondos quietos.</li><li><strong>Billetera registrada (PSP):</strong> Da rendimientos diarios menores a la inflación, pero mantenés disponibilidad 24/7.</li></ul>`; }
+                        accion: function() {
+                            return `
+                                <p class="font-bold text-sky-400 mb-1">Diferencias clave:</p>
+                                <ul class="list-disc pl-4 space-y-1 text-xs text-slate-300">
+                                    <li><strong>Banco (Caja de Ahorros):</strong> Cuenta protegida pero no te da rendimientos si dejás los fondos quietos.</li>
+                                    <li><strong>Billetera registrada (PSP):</strong> Da rendimientos diarios menores a la inflación, pero mantenés disponibilidad 24/7.</li>
+                                </ul>
+                            `;
+                        }
                     }
                 ],
-                opciones: [ "Pongo los 20.000 EC en la plataforma de TikTok; el que no arriesga no gana.", "Uso una billetera virtual registrada o banco tradicional para generar rendimientos con liquidez inmediata sin caer en fraudes.", "Dejo los fondos físicos en un cajón de mi pieza." ],
-                correcta: 1,  impacto: 8000
+                opciones: [
+                    "Pongo los 20.000 EC en la plataforma de TikTok; el que no arriesga no gana.",
+                    "Uso una billetera virtual registrada o banco tradicional para generar rendimientos con liquidez inmediata sin caer en fraudes.",
+                    "Dejo los fondos físicos en un cajón de mi pieza."
+                ],
+                correcta: 1,
+                impacto: 8000
             }
         ];
 
@@ -134,22 +219,31 @@
         let nombreUsuario = localStorage.getItem("alumno_username");
 
         window.onload = function() {
-            // Escucha la respuesta segura de la ventana emergente de login
-            window.addEventListener("message", function(event) {
-                if (event.data && event.data.status === "success") {
-                    alumnoEmail = event.data.email;
-                    nombreUsuario = event.data.username;
-                    patrimonio = event.data.patrimonio;
-                    
-                    localStorage.setItem("alumno_email", alumnoEmail);
-                    localStorage.setItem("alumno_username", nombreUsuario);
-                    
-                    mostrarBienvenida();
-                }
-            });
+            // 1. EVALUAR SI VOLVEMOS DE LA REDIRECCIÓN DE GOOGLE CON LOS DATOS
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const email = urlParams.get('email');
+            const username = urlParams.get('username');
+            const pat = urlParams.get('patrimonio');
 
+            if (status === "success" && email) {
+                alumnoEmail = email;
+                nombreUsuario = username;
+                patrimonio = parseInt(pat) || 10000;
+                
+                // Guardamos en la memoria local
+                localStorage.setItem("alumno_email", alumnoEmail);
+                localStorage.setItem("alumno_username", nombreUsuario);
+                
+                // Limpiamos los parámetros de la barra de direcciones para que quede estético
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                mostrarBienvenida();
+                return;
+            }
+
+            // 2. LOGICA ESTÁNDAR: SI YA EXISTÍA SESIÓN GUARDADA
             if (alumnoEmail) {
-                // Si el navegador ya lo recuerda, traemos su saldo actualizado de la BD
                 fetch(`${SCRIPT_URL}?email=${encodeURIComponent(alumnoEmail)}`)
                     .then(res => res.json())
                     .then(data => {
@@ -158,21 +252,17 @@
                     })
                     .catch(() => mostrarBienvenida());
             } else {
+                // Si está en cero absoluto, mostramos el login de una
                 document.getElementById('pantalla-auth').classList.remove('hidden');
             }
         };
 
         function iniciarLoginGoogle() {
-    // En lugar de abrir una ventana emergente, redirige la pestaña actual
-    const urlLogin = `${SCRIPT_URL}?action=login`;
-    
-    // Guardamos en la memoria del navegador que el usuario intentó loguearse
-    localStorage.setItem("intentando_login", "true");
-    
-    // Viajamos al script de Google
-    window.location.href = urlLogin;
-}
- 
+            const urlLogin = `${SCRIPT_URL}?action=login`;
+            localStorage.setItem("intentando_login", "true");
+            window.location.href = urlLogin; // Viaja en la misma pestaña sin popups bloqueables
+        }
+
         function mostrarBienvenida() {
             document.getElementById('pantalla-auth').classList.add('hidden');
             document.getElementById('pantalla-bienvenida').classList.remove('hidden');
@@ -187,6 +277,7 @@
         function comenzarSimulacion() {
             document.getElementById('pantalla-bienvenida').classList.add('hidden');
             document.getElementById('pantalla-juego').classList.remove('hidden');
+            
             document.getElementById('player-tag').innerText = `👤 ${nombreUsuario}`;
             document.getElementById('marcador-puntos').innerText = `Patrimonio: ${patrimonio.toLocaleString('es-AR')} EC`;
             cargarPregunta();
@@ -253,20 +344,52 @@
 
             document.getElementById('marcador-puntos').innerText = `Patrimonio: ${patrimonio.toLocaleString('es-AR')} EC`;
             
+            // Sincronización en segundo plano con Sheets
             fetch(SCRIPT_URL, {
                 method: "POST",
                 body: JSON.stringify({ email: alumnoEmail, patrimonio: patrimonio })
             });
 
             indiceActual++;
-            if (indiceActual < bancoPreguntas.length) { cargarPregunta(); } else { mostrarResultados(); }
+
+            if (indiceActual < bancoPreguntas.length) {
+                cargarPregunta();
+            } else {
+                mostrarResultados();
+            }
         }
 
         function mostrarResultados() {
             document.getElementById('pantalla-juego').classList.add('hidden');
             document.getElementById('pantalla-resultados').classList.remove('hidden');
             document.getElementById('puntos-finales').innerText = `${patrimonio.toLocaleString('es-AR')} EC`;
-            // El resto de la lógica de feedback visual se mantiene igual que en el anterior
+            
+            const idsRangos = ['rango-leyenda', 'rango-pro', 'rango-piloto', 'rango-alerta', 'rango-ponzi'];
+            idsRangos.forEach(id => {
+                document.getElementById(id).className = "border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all opacity-40";
+            });
+
+            let idDestacado = "";
+            const mensajeFeedback = document.getElementById('mensaje-feedback');
+            
+            if (patrimonio >= 30000) {
+                mensajeFeedback.innerText = "¡Nivel Gardel! Decisiones impecables. Excelente lectura del mercado e inmunidad contra estafadores.";
+                idDestacado = "rango-leyenda";
+            } else if (patrimonio >= 20000) {
+                mensajeFeedback.innerText = "¡Excelente! Cuidaste tu capital, evitaste los riesgos graves y planificaste bien.";
+                idDestacado = "rango-pro";
+            } else if (patrimonio >= 10000) {
+                mensajeFeedback.innerText = "Mantuviste las finanzas estables, pero la timidez financiera te hizo perder terreno frente a la inflación.";
+                idDestacado = "rango-piloto";
+            } else if (patrimonio >= 4500) {
+                mensajeFeedback.innerText = "¡Alerta roja! Compras impulsivas y deudas caras licuaron tu patrimonio.";
+                idDestacado = "rango-alerta";
+            } else {
+                mensajeFeedback.innerText = "Bancarrota total. Caíste en una estafa piramidal. ¡Una gran lección para aprender del error!";
+                idDestacado = "rango-ponzi";
+            }
+
+            document.getElementById(idDestacado).className = "border-2 bg-slate-750/90 p-3 rounded-xl flex justify-between items-center scale-[1.02] shadow-lg shadow-emerald-500/5 transition-all rango-ganador opacity-100 font-semibold";
         }
     </script>
 </body>
