@@ -163,11 +163,16 @@
         };
 
         function iniciarLoginGoogle() {
-            // Abre la mini ventana oficial vinculada a tu script
-            const urlLogin = `${SCRIPT_URL}?action=login`;
-            window.open(urlLogin, "Login de Google", "width=500,height=600,top=100,left=100");
-        }
-
+    // En lugar de abrir una ventana emergente, redirige la pestaña actual
+    const urlLogin = `${SCRIPT_URL}?action=login`;
+    
+    // Guardamos en la memoria del navegador que el usuario intentó loguearse
+    localStorage.setItem("intentando_login", "true");
+    
+    // Viajamos al script de Google
+    window.location.href = urlLogin;
+}
+ 
         function mostrarBienvenida() {
             document.getElementById('pantalla-auth').classList.add('hidden');
             document.getElementById('pantalla-bienvenida').classList.remove('hidden');
