@@ -3,393 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Educación Financiera</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Panel de Control Remoto - Raspberry Pi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        .btn-accion { transition: all 0.2s ease; }
-        .btn-accion:hover { transform: translateY(-1px); }
-        .rango-ganador { animation: pulseBorder 2s infinite; }
-        @keyframes pulseBorder {
-            0% { border-color: rgba(52, 211, 153, 0.4); }
-            50% { border-color: rgba(52, 211, 153, 1); }
-            100% { border-color: rgba(52, 211, 153, 0.4); }
+        :root {
+            --bg-page: #0d1117;
+            --bg-card: #161b22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-green: #238636;
+            --accent-green-hover: #2ea043;
+            --accent-blue: #58a6ff;
+            --accent-red: #da3633;
+            --status-online: #3fb950;
+            --status-offline: #f85149;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            background-color: rgba(63, 185, 80, 0.15);
+            color: var(--status-online);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--status-online);
+            box-shadow: 0 0 8px var(--status-online);
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        main {
+            flex: 1;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .toolbar {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .url-input-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .url-input-container label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #21262d;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #30363d;
+            border-color: var(--text-secondary);
+        }
+
+        button.btn-primary {
+            background-color: var(--accent-green);
+            border-color: rgba(240, 246, 252, 0.1);
+            color: #ffffff;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--accent-green-hover);
+        }
+
+        .viewport-container {
+            flex: 1;
+            min-height: 600px;
+            background-color: #000000;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+            border: none;
+            display: block;
+        }
+
+        .placeholder-screen {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .placeholder-screen svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        footer {
+            padding: 1rem 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+        }
+
+        footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans p-4 flex justify-center items-center min-h-screen">
+<body>
 
-    <div class="bg-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-xl border border-slate-700">
-        
-        <div class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-emerald-400 tracking-tight">Educación Financiera</h1>
-            <p class="text-sm text-slate-400 mt-1">Plataforma de Simulación</p>
+    <header>
+        <div class="header-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <h1>Raspberry Pi - Remote Console</h1>
+            <span class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                <span id="statusText">Listo</span>
+            </span>
+        </div>
+        <div class="header-info">
+            <div class="info-item">
+                <span>IP Local:</span>
+                <strong style="color: var(--text-primary);">10.160.31.175</strong>
+            </div>
+            <div class="info-item">
+                <span>Motor:</span>
+                <strong style="color: var(--text-primary);">noVNC + Cloudflare</strong>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="toolbar">
+            <div class="url-input-container">
+                <label for="tunnelUrl">URL del Túnel:</label>
+                <input type="text" id="tunnelUrl" placeholder="https://tu-tunel.trycloudflare.com/vnc.html" value="">
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="connectVNC()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Conectar
+                </button>
+                <button onclick="reloadFrame()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                    Recargar
+                </button>
+                <button onclick="toggleFullscreen()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                    Pantalla Completa
+                </button>
+            </div>
         </div>
 
-        <div id="pantalla-auth" class="hidden space-y-5 py-4 text-center">
-            <div class="bg-slate-750 p-5 rounded-xl border border-slate-700 space-y-3">
-                <span class="text-4xl block">📈</span>
-                <h2 class="text-xl font-bold text-white">¡Te damos la bienvenida al Simulador!</h2>
-                <p class="text-sm text-slate-300 leading-relaxed">
-                    Para registrar tus decisiones, investigar los presupuestos y acumular tus <strong>EduCoins (EC)</strong> en la lista oficial, iniciá sesión de forma segura.
-                </p>
-            </div>
-            
-            <button onclick="iniciarLoginGoogle()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer text-base shadow-lg">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3A11.934 11.934 0 0012 0C7.354 0 3.307 2.482 1.09 6.182l4.176 3.583z"/>
-                    <path fill="#4285F4" d="M23.455 12.273c0-.818-.073-1.609-.209-2.373H12v4.509h6.418a5.485 5.485 0 01-2.382 3.6l4.136 3.209c2.418-2.227 3.81-5.509 3.81-9.445z"/>
-                    <path fill="#FBBC05" d="M5.266 14.235L1.09 17.818A11.934 11.934 0 0012 24c3.236 0 5.955-1.073 7.936-2.918l-4.136-3.21c-1.127.755-2.564 1.21-3.8 1.21-2.945 0-5.436-1.983-6.327-4.655z"/>
-                    <path fill="#34A853" d="M5.266 9.765c-.227.682-.355 1.409-.355 2.173 0 .764.128 1.491.355 2.173l-4.176 3.582A11.962 11.962 0 010 12c0-2.11.545-4.1 1.09-5.818l4.176 3.583z"/>
+        <div class="viewport-container" id="viewportContainer">
+            <div class="placeholder-screen" id="placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
                 </svg>
-                Ingresar con mi cuenta de Google
-            </button>
+                <p>Ingresá la URL del túnel de noVNC y presioná <strong>Conectar</strong> para iniciar la transmisión del escritorio.</p>
+            </div>
+            <iframe id="vncFrame" src="" allowfullscreen style="display: none;"></iframe>
         </div>
+    </main>
 
-        <div id="pantalla-bienvenida" class="hidden space-y-5 py-4 text-center">
-            <div class="bg-slate-750 p-5 rounded-xl border border-slate-700 space-y-3">
-                <span class="text-4xl block">🚀</span>
-                <h2 class="text-xl font-bold text-white">¡Te damos la bienvenida al Simulador!</h2>
-                <p class="text-sm text-slate-300 leading-relaxed">
-                    A través de esta actividad vas a investigar situaciones cotidianas, detectar posibles fraudes y evaluar cómo manejás tu capital. Cada decisión cuenta.
-                </p>
-                <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700 mt-2">
-                    <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Perfil Detectado:</p>
-                    <p id="bienvenida-usuario" class="text-emerald-400 font-mono font-bold text-base mt-1">👤 Cargando...</p>
-                </div>
-                <p class="text-xs text-slate-400">¿No sos vos? <button onclick="cerrarSesion()" class="text-red-400 underline cursor-pointer font-semibold">Cambiar de cuenta</button></p>
-            </div>
-            
-            <button onclick="comenzarSimulacion()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer text-base shadow-lg shadow-emerald-500/20">
-                Comenzar Simulación
-            </button>
-        </div>
-
-        <div id="pantalla-juego" class="hidden">
-            <div class="flex justify-between items-center mb-4 text-sm font-semibold text-slate-400 bg-slate-850 p-3 rounded-xl border border-slate-700">
-                <span id="player-tag" class="text-sky-400 font-mono">👤 -</span>
-                <span id="marcador-puntos" class="text-emerald-400 font-mono text-base">Patrimonio: -</span>
-            </div>
-            
-            <div class="text-xs text-slate-400 mb-2 font-medium" id="contador-pregunta">Situación: 1/3</div>
-
-            <div class="bg-slate-750 p-5 rounded-xl border border-slate-700 mb-4">
-                <p id="texto-pregunta" class="text-lg font-medium text-white leading-relaxed">¿Cargando situación...?</p>
-            </div>
-
-            <div id="zona-herramientas" class="mb-5 flex flex-wrap gap-2"></div>
-            <div id="panel-info-extra" class="hidden bg-slate-850 border-l-4 border-amber-500 p-4 rounded-r-xl mb-5 text-sm space-y-2 max-h-60 overflow-y-auto"></div>
-            <div id="contenedor-opciones" class="space-y-3"></div>
-        </div>
-
-        <div id="pantalla-resultados" class="hidden space-y-6 py-2">
-            <div class="text-center">
-                <h2 class="text-2xl font-black text-emerald-400">Simulación Finalizada</h2>
-                <p class="text-sm text-slate-400 mt-1">Tu salud financiera registrada en Sheets:</p>
-            </div>
-
-            <div class="bg-slate-750 border border-slate-600 rounded-xl p-4 text-center shadow-inner">
-                <p class="text-xs uppercase tracking-wider text-slate-400 font-bold">Tu Patrimonio Neto Final</p>
-                <p class="text-4xl font-black text-white mt-1 font-mono" id="puntos-finales">0 EC</p>
-                <p id="mensaje-feedback" class="text-xs text-slate-300 mt-3 px-2 leading-relaxed bg-slate-800/50 py-2 rounded-lg border border-slate-700"></p>
-            </div>
-
-            <div>
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tabla Oficial de Clasificación:</h3>
-                <div class="space-y-2 text-xs">
-                    <div id="rango-leyenda" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
-                        <div>
-                            <span class="font-bold text-emerald-400 block text-sm">🏆 Inversor Leyenda (30.000 EC o más)</span>
-                            <span class="text-slate-400">Decisiones perfectas. Evitó estafas y licuó deudas con inteligencia.</span>
-                        </div>
-                    </div>
-                    <div id="rango-pro" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
-                        <div>
-                            <span class="font-bold text-sky-400 block text-sm">📈 Planificador Pro (20.000 a 29.999 EC)</span>
-                            <span class="text-slate-400">Gran desempeño. Protegió su dinero y esquivó los mayores peligros.</span>
-                        </div>
-                    </div>
-                    <div id="rango-piloto" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
-                        <div>
-                            <span class="font-bold text-amber-400 block text-sm">⚖️ Piloto de Tormentas (10.000 a 19.999 EC)</span>
-                            <span class="text-slate-400">Empate o ganancia mínima. Cauteloso, pero perdió contra la inflación.</span>
-                        </div>
-                    </div>
-                    <div id="rango-alerta" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
-                        <div>
-                            <span class="font-bold text-orange-400 block text-sm">⚠️ Zona de Alerta (4.500 a 9.999 EC)</span>
-                            <span class="text-slate-400">Decisiones impulsivas, deudas pesadas y nula consulta de costos.</span>
-                        </div>
-                    </div>
-                    <div id="rango-ponzi" class="border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all">
-                        <div>
-                            <span class="font-bold text-red-400 block text-sm">🚨 Bancarrota / Caída en Ponzi (Menos de 4.500 EC)</span>
-                            <span class="text-slate-400">Cayó en promesas mágicas de redes. Perdió casi todo su capital.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <footer>
+        <p>Alojado en GitHub Pages | Conexión WebSocket cifrada vía Cloudflare Tunnel</p>
+    </footer>
 
     <script>
-        // ==========================================
-        // PONÉ ACÁ TU URL DE DEPLOY DE APPS SCRIPT
-        // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9iAxTQClMvWhstAeX-Hrjcms6eZQx_-tlp1GWQcr-ctZq1X-SOFqOlpfmYEBgODGbKg/exec";
-
-        const bancoPreguntas = [
-            {
-                pregunta: "Cobrás tu primer sueldo por un laburo de fin de semana. No tenés gastos fijos todavía. ¿Qué estrategia armás para arrancar?",
-                consejoAsesor: "El primer paso de la salud financiera no es ganar más, sino armar una red de seguridad (Fondo de Emergencia) equivalente a tus gastos estimados por si pasa algo.",
-                herramientas: [],
-                opciones: [
-                    "Me compro ropa que está de oferta pagando el total ahora.",
-                    "Separo el 10% para mi Fondo de Emergencia y planifico el resto.",
-                    "Lo dejo en la cuenta sin mirar y voy gastando según pinte."
-                ],
-                correcta: 1,
-                impacto: 5000
-            },
-            {
-                pregunta: "Querés comprarte una computadora para estudiar. Te falta una parte del dinero. Encontrás opciones en cuotas pero recordás que tenés que mirar el Costo Financiero Total (CFT).",
-                consejoAsesor: "¡Ojo! Muchas veces te dicen 'Cuotas sin interés' pero aumentan el precio base, o te meten un CFT alto que destruye tu bolsillo.",
-                herramientas: [
-                    {
-                        texto: "🔍 Ver opciones de compra y CFT",
-                        accion: function() {
-                            return `
-                                <p class="font-bold text-amber-400 mb-1">📋 Presupuestos de Tiendas:</p>
-                                <table class="w-full text-xs text-left border-collapse">
-                                    <thead>
-                                        <tr class="border-b border-slate-700 text-slate-400">
-                                            <th class="py-1">Tienda</th>
-                                            <th class="py-1">Precio Lista</th>
-                                            <th class="py-1">Financiación</th>
-                                            <th class="py-1 text-emerald-400">CFT Real</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr><td class="py-1">Tienda A</td><td class="py-1">120.000 EC</td><td class="py-1">12 cuotas \"fijas\"</td><td class="py-1 text-red-400 font-bold">140%</td></tr>
-                                        <tr><td class="py-1">Tienda B</td><td class="py-1">105.000 EC</td><td class="py-1">Precio contado</td><td class="py-1 text-emerald-400 font-bold">0%</td></tr>
-                                        <tr><td class="py-1">Tienda C</td><td class="py-1">115.000 EC</td><td class="py-1">3 cuotas Plan Oficial</td><td class="py-1 text-amber-400 font-bold">35%</td></tr>
-                                    </tbody>
-                                </table>
-                            `;
-                        }
-                    }
-                ],
-                opciones: [
-                    "Comprar en Tienda A porque 12 cuotas parece más cómodo, sin mirar el CFT.",
-                    "Esperar a ahorrar lo que falta y pelear precio contado en Tienda B.",
-                    "Aprovechar la Tienda C: tasa fija oficial (CFT 35%) muy por debajo de la inflación."
-                ],
-                correcta: 2,
-                impacto: 7000
-            },
-            {
-                pregunta: "Tenés 20.000 EC guardados para un viaje de estudios en 4 meses. Querés que no pierdan valor frente a la inflación, pero en TikTok viste una app que te promete duplicar tu plata en una semana. ¿Qué hacés?",
-                consejoAsesor: "A mayor rendimiento prometido, mayor es el riesgo. Si algo suena demasiado bueno para ser verdad, es una estafa.",
-                herramientas: [
-                    {
-                        texto: "🏦 Billetera Virtual vs Banco",
-                        accion: function() {
-                            return `
-                                <p class="font-bold text-sky-400 mb-1">Diferencias clave:</p>
-                                <ul class="list-disc pl-4 space-y-1 text-xs text-slate-300">
-                                    <li><strong>Banco (Caja de Ahorros):</strong> Cuenta protegida pero no te da rendimientos si dejás los fondos quietos.</li>
-                                    <li><strong>Billetera registrada (PSP):</strong> Da rendimientos diarios menores a la inflación, pero mantenés disponibilidad 24/7.</li>
-                                </ul>
-                            `;
-                        }
-                    }
-                ],
-                opciones: [
-                    "Pongo los 20.000 EC en la plataforma de TikTok; el que no arriesga no gana.",
-                    "Uso una billetera virtual registrada o banco tradicional para generar rendimientos con liquidez inmediata sin caer en fraudes.",
-                    "Dejo los fondos físicos en un cajón de mi pieza."
-                ],
-                correcta: 1,
-                impacto: 8000
+        // Cargar la URL guardada previamente en localStorage si existe
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('vnc_tunnel_url');
+            if (savedUrl) {
+                document.getElementById('tunnelUrl').value = savedUrl;
             }
-        ];
+        });
 
-        let indiceActual = 0;
-        let patrimonio = 10000;
-        let alumnoEmail = localStorage.getItem("alumno_email");
-        let nombreUsuario = localStorage.getItem("alumno_username");
+        function connectVNC() {
+            const urlInput = document.getElementById('tunnelUrl').value.trim();
+            const frame = document.getElementById('vncFrame');
+            const placeholder = document.getElementById('placeholder');
+            const statusText = document.getElementById('statusText');
 
-        window.onload = function() {
-            // 1. EVALUAR SI VOLVEMOS DE LA REDIRECCIÓN DE GOOGLE CON LOS DATOS
-            const urlParams = new URLSearchParams(window.location.search);
-            const status = urlParams.get('status');
-            const email = urlParams.get('email');
-            const username = urlParams.get('username');
-            const pat = urlParams.get('patrimonio');
-
-            if (status === "success" && email) {
-                alumnoEmail = email;
-                nombreUsuario = username;
-                patrimonio = parseInt(pat) || 10000;
-                
-                // Guardamos en la memoria local
-                localStorage.setItem("alumno_email", alumnoEmail);
-                localStorage.setItem("alumno_username", nombreUsuario);
-                
-                // Limpiamos los parámetros de la barra de direcciones para que quede estético
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                mostrarBienvenida();
+            if (!urlInput) {
+                alert('Por favor ingresá una URL válida de noVNC / Cloudflare.');
                 return;
             }
 
-            // 2. LOGICA ESTÁNDAR: SI YA EXISTÍA SESIÓN GUARDADA
-            if (alumnoEmail) {
-                fetch(`${SCRIPT_URL}?email=${encodeURIComponent(alumnoEmail)}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.status === "success") patrimonio = data.patrimonio;
-                        mostrarBienvenida();
-                    })
-                    .catch(() => mostrarBienvenida());
-            } else {
-                // Si está en cero absoluto, mostramos el login de una
-                document.getElementById('pantalla-auth').classList.remove('hidden');
-            }
-        };
+            // Guardar en localStorage para futuras sesiones
+            localStorage.setItem('vnc_tunnel_url', urlInput);
 
-        function iniciarLoginGoogle() {
-            const urlLogin = `${SCRIPT_URL}?action=login`;
-            localStorage.setItem("intentando_login", "true");
-            window.location.href = urlLogin; // Viaja en la misma pestaña sin popups bloqueables
-        }
-
-        function mostrarBienvenida() {
-            document.getElementById('pantalla-auth').classList.add('hidden');
-            document.getElementById('pantalla-bienvenida').classList.remove('hidden');
-            document.getElementById('bienvenida-usuario').innerText = `👤 ${nombreUsuario} (${alumnoEmail})`;
-        }
-
-        function cerrarSesion() {
-            localStorage.clear();
-            location.reload();
-        }
-
-        function comenzarSimulacion() {
-            document.getElementById('pantalla-bienvenida').classList.add('hidden');
-            document.getElementById('pantalla-juego').classList.remove('hidden');
-            
-            document.getElementById('player-tag').innerText = `👤 ${nombreUsuario}`;
-            document.getElementById('marcador-puntos').innerText = `Patrimonio: ${patrimonio.toLocaleString('es-AR')} EC`;
-            cargarPregunta();
-        }
-
-        function cargarPregunta() {
-            const item = bancoPreguntas[indiceActual];
-            document.getElementById('texto-pregunta').innerText = item.pregunta;
-            document.getElementById('contador-pregunta').innerText = `Situación: ${indiceActual + 1}/${bancoPreguntas.length}`;
-            
-            const contenedorOpciones = document.getElementById('contenedor-opciones');
-            const zonaHerramientas = document.getElementById('zona-herramientas');
-            const panelInfoExtra = document.getElementById('panel-info-extra');
-            
-            contenedorOpciones.innerHTML = '';
-            zonaHerramientas.innerHTML = '';
-            panelInfoExtra.classList.add('hidden');
-
-            const btnAsesor = document.createElement('button');
-            btnAsesor.innerText = "💡 Consejo del Asesor";
-            btnAsesor.className = "btn-accion bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer";
-            btnAsesor.onclick = () => {
-                panelInfoExtra.innerHTML = `<p class="italic text-amber-200">" ${item.consejoAsesor} "</p>`;
-                panelInfoExtra.classList.remove('hidden');
-            };
-            zonaHerramientas.appendChild(btnAsesor);
-
-            if (item.herramientas && item.herramientas.length > 0) {
-                item.herramientas.forEach(herramienta => {
-                    const btnHerramienta = document.createElement('button');
-                    btnHerramienta.innerText = herramienta.texto;
-                    btnHerramienta.className = "btn-accion bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 border border-sky-500/40 text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer";
-                    btnHerramienta.onclick = () => {
-                        panelInfoExtra.innerHTML = herramienta.accion();
-                        panelInfoExtra.classList.remove('hidden');
-                    };
-                    zonaHerramientas.appendChild(btnHerramienta);
-                });
+            // Ajustar parámetros recomendados para noVNC si no están presentes
+            let targetUrl = urlInput;
+            if (!targetUrl.includes('autoconnect=')) {
+                targetUrl += (targetUrl.includes('?') ? '&' : '?') + 'autoconnect=true&resize=remote';
             }
 
-            item.opciones.forEach((opcion, index) => {
-                const boton = document.createElement('button');
-                boton.innerText = opcion;
-                boton.className = "btn-accion w-full text-left bg-slate-700 hover:bg-slate-650 border border-slate-600 text-slate-200 p-4 rounded-xl font-medium cursor-pointer block text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400";
-                boton.onclick = () => verificarRespuesta(index);
-                contenedorOpciones.appendChild(boton);
-            });
+            placeholder.style.display = 'none';
+            frame.style.display = 'block';
+            frame.src = targetUrl;
+
+            statusText.innerText = 'Conectando...';
         }
 
-        function verificarRespuesta(indiceSeleccionado) {
-            const item = bancoPreguntas[indiceActual];
-            if (indiceSeleccionado === item.correcta) {
-                patrimonio += item.impacto;
-                alert("¡Excelente jugada! Decisión inteligente. 💰");
+        function reloadFrame() {
+            const frame = document.getElementById('vncFrame');
+            if (frame.src && frame.src !== 'about:blank') {
+                frame.src = frame.src;
+            }
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('viewportContainer');
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                }
             } else {
-                if (indiceActual === 2 && indiceSeleccionado === 0) {
-                    patrimonio = Math.floor(patrimonio * 0.2); 
-                    alert("🚨 ¡CAÍSTE EN LA ESTAFA! Perdiste casi todas tus EduCoins.");
-                } else {
-                    patrimonio -= Math.floor(item.impacto / 2);
-                    alert("Uff... mala decisión para tus finanzas. ❌");
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
                 }
             }
-
-            document.getElementById('marcador-puntos').innerText = `Patrimonio: ${patrimonio.toLocaleString('es-AR')} EC`;
-            
-            // Sincronización en segundo plano con Sheets
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ email: alumnoEmail, patrimonio: patrimonio })
-            });
-
-            indiceActual++;
-
-            if (indiceActual < bancoPreguntas.length) {
-                cargarPregunta();
-            } else {
-                mostrarResultados();
-            }
-        }
-
-        function mostrarResultados() {
-            document.getElementById('pantalla-juego').classList.add('hidden');
-            document.getElementById('pantalla-resultados').classList.remove('hidden');
-            document.getElementById('puntos-finales').innerText = `${patrimonio.toLocaleString('es-AR')} EC`;
-            
-            const idsRangos = ['rango-leyenda', 'rango-pro', 'rango-piloto', 'rango-alerta', 'rango-ponzi'];
-            idsRangos.forEach(id => {
-                document.getElementById(id).className = "border border-slate-700 bg-slate-850/40 p-2.5 rounded-xl flex justify-between items-center transition-all opacity-40";
-            });
-
-            let idDestacado = "";
-            const mensajeFeedback = document.getElementById('mensaje-feedback');
-            
-            if (patrimonio >= 30000) {
-                mensajeFeedback.innerText = "¡Nivel Gardel! Decisiones impecables. Excelente lectura del mercado e inmunidad contra estafadores.";
-                idDestacado = "rango-leyenda";
-            } else if (patrimonio >= 20000) {
-                mensajeFeedback.innerText = "¡Excelente! Cuidaste tu capital, evitaste los riesgos graves y planificaste bien.";
-                idDestacado = "rango-pro";
-            } else if (patrimonio >= 10000) {
-                mensajeFeedback.innerText = "Mantuviste las finanzas estables, pero la timidez financiera te hizo perder terreno frente a la inflación.";
-                idDestacado = "rango-piloto";
-            } else if (patrimonio >= 4500) {
-                mensajeFeedback.innerText = "¡Alerta roja! Compras impulsivas y deudas caras licuaron tu patrimonio.";
-                idDestacado = "rango-alerta";
-            } else {
-                mensajeFeedback.innerText = "Bancarrota total. Caíste en una estafa piramidal. ¡Una gran lección para aprender del error!";
-                idDestacado = "rango-ponzi";
-            }
-
-            document.getElementById(idDestacado).className = "border-2 bg-slate-750/90 p-3 rounded-xl flex justify-between items-center scale-[1.02] shadow-lg shadow-emerald-500/5 transition-all rango-ganador opacity-100 font-semibold";
         }
     </script>
 </body>
